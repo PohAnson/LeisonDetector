@@ -13,7 +13,7 @@ BASE_DIR = '/shared/WorkAttachment/codes/code6'
 BASE_DATA_PATH = "D:\WorkAttachment\Datas"
 BASE_DIR = 'D:\WorkAttachment\codes\code6'
 
-BASE_DATA_PATH = os.path.sep.join(['..', 'Datas'])
+BASE_DATA_PATH = os.path.sep.join(['..', '..', 'Datas'])
 BASE_DIR = '.'
 
 # IMAGES_PATH = os.path.sep.join([BASE_DATA_PATH, "categorised_images_HU"])
