@@ -131,17 +131,17 @@ class DataGenerator(Sequence):
 
         return
 
-def layer_mask(self, original_dim, coords, mask=None):
+def layer_mask(resultant_dim, original_dim, coords, mask=None):
     if mask is None:
-        mask = np.zeros(shape=self.dim, dtype=np.float)
-    if original_dim != self.dim:
+        mask = np.zeros(shape=resultant_dim, dtype=np.float)
+    if original_dim != resultant_dim:
         original_dim = [int(j.strip()) for j in original_dim.split(',')]
-        sx, ex = [int(x*self.dim[0]//original_dim[0]) for x in coords[::2]]
-        sy, ey = [int(y*self.dim[1]//original_dim[1]) for y in coords[1::2]]
+        sx, ex = [int(x*resultant_dim[0]//original_dim[0]) for x in coords[::2]]
+        sy, ey = [int(y*resultant_dim[1]//original_dim[1]) for y in coords[1::2]]
     else:
         sx, sy, ex, ey = [int(j) for j in coords]
     for row_offset in range(sy, ey):
-        mask.ravel()[sx+row_offset*self.dim[0]:ex+row_offset*self.dim[0]] = 1
+        mask.ravel()[sx+row_offset*resultant_dim[0]:ex+row_offset*resultant_dim[0]] = 1
     # plt.imshow(mask)
     # plt.colorbar()
     # plt.show()
