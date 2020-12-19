@@ -109,7 +109,7 @@ class DataGenerator(Sequence):
                 for i in range(len(row)):
                     cur_dim = original_dim.iloc[i] #if len(row) > 1 else original_dim
                     cur_coords = [float(j.strip()) for j in bboxes.iloc[i].split(',')]
-                    img_mask = self.layer_mask(cur_dim, cur_coords, mask=img_mask)
+                    img_mask = layer_mask(cur_dim, cur_coords, mask=img_mask)
                 targets['bounding_box'].append(img_mask)
             targets_list.append(targets)
         targets['class_label'] = np.array(targets['class_label'])
@@ -131,21 +131,21 @@ class DataGenerator(Sequence):
 
         return
 
-    def layer_mask(self, original_dim, coords, mask=None):
-        if mask is None:
-            mask = np.zeros(shape=self.dim, dtype=np.float)
-        if original_dim != self.dim:
-            original_dim = [int(j.strip()) for j in original_dim.split(',')]
-            sx, ex = [int(x*self.dim[0]//original_dim[0]) for x in coords[::2]]
-            sy, ey = [int(y*self.dim[1]//original_dim[1]) for y in coords[1::2]]
-        else:
-            sx, sy, ex, ey = [int(j) for j in coords]
-        for row_offset in range(sy, ey):
-            mask.ravel()[sx+row_offset*self.dim[0]:ex+row_offset*self.dim[0]] = 1
-        # plt.imshow(mask)
-        # plt.colorbar()
-        # plt.show()
-        return mask
+def layer_mask(self, original_dim, coords, mask=None):
+    if mask is None:
+        mask = np.zeros(shape=self.dim, dtype=np.float)
+    if original_dim != self.dim:
+        original_dim = [int(j.strip()) for j in original_dim.split(',')]
+        sx, ex = [int(x*self.dim[0]//original_dim[0]) for x in coords[::2]]
+        sy, ey = [int(y*self.dim[1]//original_dim[1]) for y in coords[1::2]]
+    else:
+        sx, sy, ex, ey = [int(j) for j in coords]
+    for row_offset in range(sy, ey):
+        mask.ravel()[sx+row_offset*self.dim[0]:ex+row_offset*self.dim[0]] = 1
+    # plt.imshow(mask)
+    # plt.colorbar()
+    # plt.show()
+    return mask
 
 def ImagePreprocessing(imgpath, dim):
     img = img_to_array(load_img(imgpath).resize(dim), dtype='float32')

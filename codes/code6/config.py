@@ -39,7 +39,7 @@ DEBUG_DIR = os.path.sep.join([LOG_DIR, "debug"])
 
 # initialize our initial learning rate, number of epochs to train
 # for, and the batch size
-INIT_LR = 1e-2
+INIT_LR = 1e-4
 NUM_EPOCHS = 2
 BATCH_SIZE = 8
 

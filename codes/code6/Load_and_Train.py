@@ -12,7 +12,7 @@ random.seed(seed)
 np.random.seed(seed)
 
 import config
-from CustomLossFunction import DiceLoss
+from CustomLossFunction import DiceLoss, dice_coef
 from Generator import DataGenerator
 from ModelBuilding import CreateModel
 
@@ -47,17 +47,18 @@ datagen = DataGenerator(filenames1, config.IMAGES_PATH, config.ANNOTS_PATH, batc
 
 model = CreateModel()
 print('Loading weights')
-model.load_weights(r'output/models/bests/model.04-7.95.h5')
+# model.load_weights(r'output/models/bests/model.04-7.95.h5')
 
 losses = {
     "class_label": tf.keras.losses.categorical_crossentropy,
-    "bounding_box": DiceLoss,
+    "bounding_box": dice_coef,
 }
 
 print('Compiling')
 LR = 1e-3 #config.INIT_LR
 opt = tf.keras.optimizers.Adam(learning_rate=LR, clipnorm=1)
-model.compile(optimizer=opt, loss=losses)
+opt = tf.keras.optimizers.SGD(learning_rate=LR)
+model.compile(optimizer=opt, loss=losses, metrics=['acc'])
 
 cbs =[
     tf.keras.callbacks.ModelCheckpoint(filepath='./output/models/bests/model.{epoch:02d}-{loss:.2f}.h5', save_weights_only=True, monitor='loss'),

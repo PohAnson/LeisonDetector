@@ -60,8 +60,13 @@ def CreateModel():
         name="bounding_box")(bboxHead)
 
 
-    model = tf.keras.models.Model(inputs=model.input, outputs=[softmaxHead, bboxHead])
-    plot_model(model, show_shapes=True)
+    model = tf.keras.models.Model(inputs=model.input, outputs=[classificationHead, bboxHead])
+    plot_model(model, show_shapes=True, to_file='model.png')
     print(model.summary())
 
     return model
+
+if __name__ == "__main__":
+    CreateModel()
+
+    print('Finished Creation')
