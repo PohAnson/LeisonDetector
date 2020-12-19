@@ -55,7 +55,7 @@ losses = {
 }
 
 print('Compiling')
-LR = 1e-3 #config.INIT_LR
+LR = config.INIT_LR
 opt = tf.keras.optimizers.Adam(learning_rate=LR, clipnorm=1)
 opt = tf.keras.optimizers.SGD(learning_rate=LR)
 model.compile(optimizer=opt, loss=losses, metrics=['acc'])
