@@ -10,11 +10,11 @@ BASE_DATA_PATH = "/shared/WorkAttachment/Datas"
 BASE_DIR = '/shared/WorkAttachment/codes/code6'
 
 #WINDOWS
-BASE_DATA_PATH = "D:\WorkAttachment\Datas"
-BASE_DIR = 'D:\WorkAttachment\codes\code6'
+# BASE_DATA_PATH = "D:\WorkAttachment\Datas"
+# BASE_DIR = 'D:\WorkAttachment\codes\code6'
 
-BASE_DATA_PATH = os.path.sep.join(['..', '..', 'Datas'])
-BASE_DIR = '.'
+# BASE_DATA_PATH = os.path.sep.join(['..', '..', 'Datas'])
+# BASE_DIR = '.'
 
 # IMAGES_PATH = os.path.sep.join([BASE_DATA_PATH, "categorised_images_HU"])
 IMAGES_PATH = os.path.sep.join([BASE_DATA_PATH, "HU"])
@@ -29,7 +29,7 @@ if not os.path.exists(BASE_OUTPUT):
 # define the path to the output serialized model, model training plot,
 # and testing image filenames
 BASE_MODEL_PATH = os.path.sep.join([BASE_OUTPUT, "models", f"{datetime.datetime.now().strftime('%Y%m%d')}"])
-MODEL_PATH = os.path.sep.join([BASE_MODEL_PATH, f"detector{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"])
+MODEL_PATH = os.path.sep.join([BASE_MODEL_PATH, f"latest_model"])
 MODEL_ARCHITECTURE = os.path.sep.join([BASE_MODEL_PATH, f"architecture{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.h5"])
 MODEL_WEIGHTS = os.path.sep.join([BASE_MODEL_PATH,'models', f"weights{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"])
 
@@ -39,8 +39,8 @@ DEBUG_DIR = os.path.sep.join([LOG_DIR, "debug"])
 
 # initialize our initial learning rate, number of epochs to train
 # for, and the batch size
-INIT_LR = 1e-4
-NUM_EPOCHS = 2
+INIT_LR = 5e-6
+NUM_EPOCHS = 3
 BATCH_SIZE = 8
 
 

@@ -1,6 +1,5 @@
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 import os
-import cv2
 import numpy as np
 from tensorflow.keras.utils import Sequence
 import pandas as pd
@@ -109,8 +108,9 @@ class DataGenerator(Sequence):
                 for i in range(len(row)):
                     cur_dim = original_dim.iloc[i] #if len(row) > 1 else original_dim
                     cur_coords = [float(j.strip()) for j in bboxes.iloc[i].split(',')]
-                    img_mask = layer_mask(cur_dim, cur_coords, mask=img_mask)
+                    img_mask = layer_mask(self.dim, cur_dim, cur_coords, mask=img_mask)
                 targets['bounding_box'].append(img_mask)
+
             targets_list.append(targets)
         targets['class_label'] = np.array(targets['class_label'])
         targets['bounding_box'] = np.array(targets['bounding_box'])
@@ -153,3 +153,20 @@ def ImagePreprocessing(imgpath, dim):
     img = np.repeat(img,3, axis=2)
     img /= 255
     return img
+    
+def GenBboxCoord(csvpath, filenames):
+
+    df = pd.read_csv(csvpath)
+    coords_list = []
+    for fn in filenames:
+        temp_coord_list = []
+        row = df[df['File_name'] == fn]
+        bboxes = row['Bounding_boxes'].iloc[:]
+        original_dim = row['Image_size'].iloc[:]
+        img_mask = None
+        for i in range(len(row)):
+            cur_dim = original_dim.iloc[i] 
+            cur_coords = [float(j.strip()) for j in bboxes.iloc[i].split(',')]
+            temp_coord_list.append(cur_coords)
+        coords_list.append(temp_coord_list)
+    return coords_list

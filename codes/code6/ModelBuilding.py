@@ -1,27 +1,31 @@
 import numpy as np
-import random 
+import random
 import datetime
 import tensorflow as tf
 from tensorflow.keras import Sequential, layers
-from tensorflow.keras.layers import Dense, Flatten, Dropout, Conv2D, UpSampling2D
+from tensorflow.keras.layers import Dense, Flatten, Dropout, Conv2D,\
+    UpSampling2D
 from tensorflow.keras.utils import plot_model
 import config
+from RoiPoolingConv import ROIPoolingLayer, RoiPoolingConv
+from tf.keras.applications.vgg16 import VGG16
 
 random.seed(123)
 np.random.seed(123)
 
+
 def CreateModel():
     print('Creating model')
     model = Sequential(name='MyModel')
-    model.add(tf.keras.layers.Input(shape=(512,512,3)))
-    vgg16mod = tf.keras.applications.vgg16.VGG16(include_top=False, input_shape=(512, 512, 3))
-    for i in tf.keras.applications.vgg16.VGG16(include_top=False, input_shape=(512, 512, 3)).layers[1:]:
-        if i.name in ['block4_pool','block5_pool']:
+    model.add(tf.keras.layers.Input(shape=(512, 512, 3)))
+    vgg16mod = VGG16(include_top=False, input_shape=(512, 512, 3))
+    for i in VGG16(include_top=False, input_shape=(512, 512, 3)).layers[1:]:
+        if i.name in ['block4_pool', 'block5_pool']:
             continue
         elif i.name == 'block1_conv1':
             initial_weights = i.get_weights()
             weights = np.mean(initial_weights[0], axis=2)
-            weights.resize((3,3,1, initial_weights[0].shape[-1]))
+            weights.resize((3, 3, 1, initial_weights[0].shape[-1]))
             weights = np.repeat(weights, 3, axis=2)
             new = Conv2D.from_config(i.get_config())
             model.add(new)
@@ -38,29 +42,37 @@ def CreateModel():
             model.layers[-1].set_weights(initial_weights)
         elif 'pool' in i.name:
             new = layers.MaxPooling2D.from_config(i.get_config())
-            model.add(new) 
+            model.add(new)
 
-    model.add(Conv2D(512, (3, 3)))
+    # model.add(ROIPoolingLayer(7,7))
+    # model.add(RoiPoolingConv(7, 32))
 
+    classificationHead = Conv2D(512, (3, 3), strides=1,
+                                padding='same')(model.output)
+    classificationHead = Conv2D(512, (5, 5), strides=1,
+                                padding='same')(classificationHead)
+    classificationHead = Flatten()(classificationHead)
+    # classificationHead = Flatten()(model.output)
+    classificationHead = Dense(512, activation="relu")(classificationHead)
+    classificationHead = Dense(256, activation="relu")(classificationHead)
+    classificationHead = Dense(32, activation="relu")(classificationHead)
+    classificationHead = Dense(8, activation="sigmoid",
+                               name="class_label")(classificationHead)
 
-    softmaxHead = Conv2D(512, (5, 5), strides=1, padding='same')(model.output)
-    softmaxHead = Flatten()(softmaxHead)
-    softmaxHead = Dense(128, activation="relu")(softmaxHead)
-    softmaxHead = Dense(32, activation="relu")(softmaxHead)
-    softmaxHead = Dense(8, activation="softmax",
-        name="class_label")(softmaxHead)
-
-
-    bboxHead = layers.ZeroPadding2D(padding=(1,1))(model.output)
-    bboxHead = UpSampling2D(size=(2,2))(bboxHead)
-    bboxHead = UpSampling2D(size=(2,2))(bboxHead)
-    bboxHead = UpSampling2D(size=(2,2))(bboxHead)
-    bboxHead = Dense(256, activation="tanh")(bboxHead)
+    bboxHead = Conv2D(512, (3, 3), strides=1, padding='same')(model.output)
+    bboxHead = UpSampling2D(size=(2, 2))(bboxHead)
+    bboxHead = Dense(256, activation="relu")(bboxHead)
+    bboxHead = UpSampling2D(size=(2, 2))(bboxHead)
+    bboxHead = Dense(128, activation="relu")(bboxHead)
+    bboxHead = UpSampling2D(size=(2, 2))(bboxHead)
+    bboxHead = Dense(64, activation="relu")(bboxHead)
+    bboxHead = Dense(32, activation="relu")(bboxHead)
     bboxHead = Dense(1, activation="sigmoid",
-        name="bounding_box")(bboxHead)
+                     name="bounding_box")(bboxHead)
 
 
-    model = tf.keras.models.Model(inputs=model.input, outputs=[classificationHead, bboxHead])
+    model = tf.keras.models.Model(inputs=model.input,
+                                  outputs=[classificationHead, bboxHead])
     plot_model(model, show_shapes=True, to_file='model.png')
     print(model.summary())
 

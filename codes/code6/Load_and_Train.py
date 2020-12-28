@@ -6,8 +6,8 @@ import pandas as pd
 import random
 import tensorflow as tf
 import tensorflow.keras as keras
-# 38024, 94261
-seed = 94261
+# 94261, 15403 
+seed = 39562
 random.seed(seed)
 np.random.seed(seed)
 
@@ -45,24 +45,30 @@ datagen = DataGenerator(filenames1, config.IMAGES_PATH, config.ANNOTS_PATH, batc
 
 # model = keras.models.load_model(os.path.sep.join([config.BASE_MODEL_PATH, ""]) ,compile=False, custom_objects={'DiceLoss':DiceLoss})
 
-model = CreateModel()
-print('Loading weights')
-# model.load_weights(r'output/models/bests/model.04-7.95.h5')
+weights_used = False
+if weights_used:
+    model = CreateModel()
+    # print('Loading weights')
+    # model.load_weights(r'output/models/bests/model.02-1.60.h5')
+    # model.load_weights(r'output\models\20201220\detector20201220-013902')
 
-losses = {
-    "class_label": tf.keras.losses.categorical_crossentropy,
-    "bounding_box": dice_coef,
-}
+    LR = config.INIT_LR
+    opt = tf.keras.optimizers.Adam(learning_rate=LR, clipnorm=1)
+    model.compile(optimizer=opt, loss=losses, metrics=['acc'])
 
-print('Compiling')
-LR = config.INIT_LR
-opt = tf.keras.optimizers.Adam(learning_rate=LR, clipnorm=1)
-opt = tf.keras.optimizers.SGD(learning_rate=LR)
-model.compile(optimizer=opt, loss=losses, metrics=['acc'])
+    losses = {
+        "class_label": tf.keras.losses.categorical_crossentropy,
+        "bounding_box": dice_coef,
+    }
+
+else:
+    model = CreateModel()
+    model = keras.models.load_model(os.path.sep.join([config.BASE_DIR, 'output','models','20201220','latest_model']), custom_objects={'dice_coef': dice_coef}, compile=True)
+    model = keras.models.load_model(os.path.sep.join([config.BASE_DIR, 'output','models','20201220','latest_model']), custom_objects={'dice_coef': dice_coef}, compile=True)
 
 cbs =[
     tf.keras.callbacks.ModelCheckpoint(filepath='./output/models/bests/model.{epoch:02d}-{loss:.2f}.h5', save_weights_only=True, monitor='loss'),
-    tf.keras.callbacks.TensorBoard(histogram_freq=1, profile_batch=(2,10), update_freq='batch', log_dir=f'./logs/fit/{datetime.datetime.now().strftime("%Y%m%d-%H%M%S")}'),
+    tf.keras.callbacks.TensorBoard(histogram_freq=1, profile_batch=(2,5), update_freq='batch', log_dir=f'./logs/fit/{datetime.datetime.now().strftime("%Y%m%d-%H%M%S")}'),
 ]
 
 print(model.summary())
@@ -80,4 +86,5 @@ plt.title("Bounding Box Regression Loss on Training Set")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss")
 plt.legend(loc="lower left")
-plt.savefig(config.PLOT_PATH)
+# plt.savefig(config.PLOT_PATH)
+print('end')
