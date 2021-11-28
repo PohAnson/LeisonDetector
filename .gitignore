@@ -1,0 +1,13 @@
+.env
+
+.ipynb_checkpoints
+__pycache__
+venv
+
+
+HU
+models
+ProcessDocumentation
+
+# IDE
+.vscode
